@@ -10,6 +10,11 @@ fn factorial(num: u64) -> u64 {
     // - additional variables
     // For an extra challenge, don't use:
     // - recursion
+    if (num == 0) {
+        return 1;
+    }
+    let fact = num.checked_mul(factorial(num - 1));
+    fact.unwrap_or(1)
 }
 
 fn main() {
