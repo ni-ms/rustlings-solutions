@@ -106,3 +106,69 @@ handle.join().unwrap();
 | **Module**              | `std::rc`                | `std::sync`                |
 
 If you're in a single-threaded context, prefer `Rc` for its simplicity and performance. For multi-threaded environments, `Arc` is the go-to solution for safe shared ownership.
+
+# Cow
+In Rust, `Cow` stands for **Copy on Write**, and it's a smart pointer provided by the `std::borrow` module. It allows you to work with data that may be either owned or borrowed. The key feature of `Cow` is that it enables efficient handling of data by avoiding unnecessary cloning unless mutation is required.
+
+### Structure of `Cow`:
+```rust
+enum Cow<'a, B: ?Sized + ToOwned> {
+    Borrowed(&'a B),  // Represents a borrowed reference to data
+    Owned(<B as ToOwned>::Owned), // Represents an owned value
+}
+```
+
+### Key Features:
+1. **Borrowing by Default**: `Cow` starts as a borrowed reference (`Cow::Borrowed`) to avoid copying or owning the data unnecessarily.
+2. **Cloning on Mutation**: If mutation is required, `Cow` creates an owned copy (`Cow::Owned`) of the data to preserve the immutability of the original borrowed data.
+3. **Generic over Data**: `Cow` can work with various data types that implement the `ToOwned` trait, like `str` or slices.
+
+---
+
+### When to Use `Cow`:
+1. **Avoiding Unnecessary Copies**: Use `Cow` when your function might need to mutate data, but often works with immutable data. For example:
+    - Handling large strings or data slices where cloning is costly.
+    - APIs that accept either owned or borrowed data.
+
+2. **Flexibility in APIs**: `Cow` is ideal for situations where the caller can provide either owned or borrowed data, and the API adapts accordingly.
+
+---
+
+### Example: Using `Cow` with Strings
+```rust
+use std::borrow::Cow;
+
+fn modify_string(input: &str) -> Cow<str> {
+    if input.contains('a') {
+        // Create an owned, modified version
+        Cow::Owned(input.replace('a', "@"))
+    } else {
+        // Use the borrowed version
+        Cow::Borrowed(input)
+    }
+}
+
+fn main() {
+    let borrowed = "hello";
+    let owned = "apple";
+    
+    let result1 = modify_string(borrowed); // Borrowed remains unchanged
+    let result2 = modify_string(owned); // Cloned and modified
+    
+    println!("Result 1: {}", result1);
+    println!("Result 2: {}", result2);
+}
+```
+
+### Explanation of the Example:
+1. If the input string contains `'a'`, an owned (cloned and modified) version is created using `Cow::Owned`.
+2. Otherwise, the original reference is reused via `Cow::Borrowed`, avoiding the cost of cloning.
+
+---
+
+### Benefits:
+- Avoids unnecessary allocations when working with borrowed data.
+- Efficiently transitions to ownership only when mutation is required.
+- Provides a flexible API for handling both owned and borrowed data seamlessly.
+
+Let me know if you'd like to dive deeper into `Cow` or related topics!
