@@ -58,3 +58,51 @@ This pattern is useful in scenarios with shared and mutable references, but it's
 - Use **`Rc<>`** when shared ownership is required, such as in graphs or other structures where nodes are accessed from multiple locations.
 - Combine **`Rc<>` + `RefCell<>`** if you need both shared ownership and mutation.
 
+The primary difference between `Rc` (Reference Counted) and `Arc` (Atomic Reference Counted) lies in their **thread-safety**:
+
+### 1. **`Rc`: Reference Counted**
+- **Single-Threaded**: `Rc` is not thread-safe and cannot be shared across threads. It's designed for single-threaded programs where reference counting is sufficient without additional overhead.
+- **No Atomic Operations**: The reference count is updated without atomic operations, making `Rc` lighter and faster compared to `Arc`.
+- **Common Use Case**: Sharing ownership of immutable data in single-threaded applications, such as tree-like data structures in a GUI.
+
+Example:
+```rust
+use std::rc::Rc;
+
+let data = Rc::new(42);
+let shared_data = Rc::clone(&data); // Increment reference count
+```
+
+---
+
+### 2. **`Arc`: Atomic Reference Counted**
+- **Multi-Threaded**: `Arc` is thread-safe and allows shared ownership of data across threads. It achieves this by using atomic operations to manage the reference count.
+- **Atomic Operations**: This ensures that updates to the reference count are safe even in concurrent contexts but comes with a performance cost due to the overhead of atomicity.
+- **Common Use Case**: Sharing ownership of data in multi-threaded programs, such as with worker threads accessing shared configurations.
+
+Example:
+```rust
+use std::sync::Arc;
+use std::thread;
+
+let data = Arc::new(42);
+let shared_data = Arc::clone(&data); // Increment reference count atomically
+
+let handle = thread::spawn(move || {
+    println!("Shared data: {}", shared_data);
+});
+handle.join().unwrap();
+```
+
+---
+
+### Key Differences Summary
+
+| Feature                | `Rc`                      | `Arc`                      |
+|------------------------|---------------------------|----------------------------|
+| **Thread-Safe**         | No                       | Yes                        |
+| **Use Case**            | Single-threaded          | Multi-threaded             |
+| **Performance**         | Lightweight, no atomic ops | Heavier, atomic operations |
+| **Module**              | `std::rc`                | `std::sync`                |
+
+If you're in a single-threaded context, prefer `Rc` for its simplicity and performance. For multi-threaded environments, `Arc` is the go-to solution for safe shared ownership.
