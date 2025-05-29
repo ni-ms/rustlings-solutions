@@ -1,0 +1,3 @@
+- Add an ! to call a macro
+- Where you define a macro matters!
+- Use ```#[macro_export]``` to use macro outside module
