@@ -224,3 +224,10 @@ for handle in handles {
 ```
 This prevents an abrupt crash and lets you log or recover from errors.
 
+# Threads 2
+https://doc.rust-lang.org/book/ch16-03-shared-state.html#atomic-reference-counting-with-arct
+
+# Threads 3
+https://doc.rust-lang.org/book/ch16-02-message-passing.html
+
+Clone the tx and use it.
